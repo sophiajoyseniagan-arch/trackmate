@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TrackMate - QR Code Access</title>
+    <style>
+        body {
+            background: #0a051c;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: #1a1035;
+            padding: 30px 20px;
+            border-radius: 20px;
+            border: 2px solid #7c3aed;
+        }
+        h1 {
+            color: #7c3aed;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .qr-box {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            display: inline-block;
+        }
+        #qrcode {
+            display: flex;
+            justify-content: center;
+        }
+        .ip-input {
+            margin: 20px 0;
+        }
+        input {
+            padding: 12px;
+            width: 80%;
+            border-radius: 10px;
+            border: 2px solid #7c3aed;
+            background: #0f0725;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+        }
+        button {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .steps {
+            text-align: left;
+            background: #2a1f4a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .note {
+            color: #facc15;
+            margin-top: 15px;
+        }
+    </style>
+    <!-- Load QRCode library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 TrackMate Mobile</h1>
+        <p>Scan QR code with your phone camera</p>
+        
+        <div class="qr-box">
+            <div id="qrcode"></div>
+        </div>
+        
+        <div class="ip-input">
+            <p>Your Computer IP:</p>
+            <input type="text" id="ipAddress" placeholder="e.g., 192.168.1.105" value="192.168.1.105">
+            <br>
+            <button onclick="generateQR()">Generate QR Code</button>
+            <button onclick="findMyIP()">Find My IP</button>
+        </div>
+
+        <div class="steps">
+            <h3>📋 How to use:</h3>
+            <ol style="color: #e5e7eb; line-height: 1.8;">
+                <li>Make sure Live Server is running (port 5500)</li>
+                <li>Enter your computer's IP address above</li>
+                <li>Click "Generate QR Code"</li>
+                <li>Scan with your phone's camera</li>
+                <li>Website opens automatically!</li>
+            </ol>
+        </div>
+
+        <div class="note">
+            ⚡ Your phone must be on the SAME WiFi as computer
+        </div>
+    </div>
+
+    <script>
+        function generateQR() {
+            const ip = document.getElementById('ipAddress').value;
+            const url = `http://${ip}:5500`;
+            
+            // Clear old QR code
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generate new QR code
+            new QRCode(document.getElementById('qrcode'), {
+                text: url,
+                width: 250,
+                height: 250
+            });
+            
+            // Show success message
+            alert(`QR Code generated for: ${url}`);
+        }
+
+        function findMyIP() {
+            // Try to get IP automatically
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('ipAddress').value = data.ip;
+                    generateQR();
+                })
+                .catch(() => {
+                    alert('Could not auto-detect IP. Please check your IP using ipconfig command');
+                    
+                    // Show instructions
+                    const steps = document.querySelector('.steps');
+                    steps.innerHTML += `
+                        <p style="color: #facc15; margin-top: 10px;">
+                            To find your IP on Windows:<br>
+                            1. Press Windows + R, type "cmd"<br>
+                            2. Type "ipconfig"<br>
+                            3. Look for "IPv4 Address" (192.168.x.x)
+                        </p>
+                    `;
+                });
+        }
+
+        // Generate default QR on page load
+        setTimeout(() => {
+            generateQR();
+        }, 500);
+    </script>
+</body>
+</html>
